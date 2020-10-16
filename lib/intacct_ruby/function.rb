@@ -16,6 +16,7 @@ module IntacctRuby
       getAPISession
       create_potransaction
       get_trialbalance
+      getDimension
     ).freeze
 
     CU_TYPES = %w(create update).freeze
