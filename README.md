@@ -321,7 +321,8 @@ IntacctRuby::Request.new(REQUEST_OPTS)
 
 Add this line to your application's Gemfile:
 
-```ruby
+```
+ruby
 gem 'intacct_ruby'
 ```
 
@@ -333,6 +334,17 @@ Or install it yourself as:
 
     $ gem install intacct_ruby
 
+Or include the gem in your Gemfile as:
+```
+gem 'intacct_ruby', git: 'https://github.com/PrepDD/intacct-ruby.git'
+```
+
+To build the custom gem simply use:
+
+```
+rake build
+rake install
+```
 
 ## Wrapper Class
 
