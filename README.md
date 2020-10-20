@@ -40,7 +40,10 @@ request.create object_type: :PROJECT, parameters: {
   BLOWDRY: 'false' # a custom field
 }
 
-request.send
+request.send!
+
+**Note:** in our version of ruby/rails `send` is already defined on the request object by net/http and we therefore must use `send!`
+
 ```
 
 **Note:** Here `:CUSTOMER` and `:PROJECT` are object-types which are tagged just after the function tag `create` and are case-sensitive along with the extra-parameters(CUSTOMERID, FIRST_NAME ..)
@@ -100,7 +103,7 @@ request.readByQuery parameters: {
   pagesize: 100
 }
 
-request.send
+request.send!
 ```
 
 This will fire off a request that looks something like this:
@@ -134,7 +137,7 @@ request.readMore parameters: {
   resultId: '7765623332WU1hh8CoA4QAAHxI9i8AAAAA5'
 }
 
-request.send
+request.send!
 ```
 
 This will fire off a request that looks something like this:
@@ -157,6 +160,45 @@ This will fire off a request that looks something like this:
 ```
 
 If there are function errors (e.g. you omitted a required field) you'll see an error on response. Same if you see an internal server error, or any error outside of the 2xx range.
+
+### Read Requests of Web API
+
+Note if you're using the Web API, for example `get_TrialBalance`, you can call that function directly rather than use the `readByQuery` method.
+
+For instance:
+
+```
+    @request.get_trialbalance parameters: { 
+      startdate: {:year => '1900', :month => '01', :day => '01'},
+      enddate: {:year => Time.now.year, :month => Time.now.month, :day => Time.now.day},
+      departmentid: department_id,
+      locationid: location_id
+    } 
+
+
+    #puts @r.to_xml 
+
+    response = @r.send!
+
+    body = response.response_body
+
+    #puts body.to_xhtml 
+    bals = body.xpath("//trialbalance")
+
+    all_bals = Array.new 
+   
+    bals.each do |bal|
+      bal_obj = {} 
+      bal_obj["id"] = bal.xpath("glaccountno").text
+      bal_obj["balance"] = bal.xpath("endbalance").text
+      bal_obj["reportingbook"] = bal.xpath("reportingbook").text
+      bal_obj["currency"] = bal.xpath("currency").text
+      all_bals.push (bal_obj)
+    end 
+```
+
+If you could a `function not allowed` error, you may need to change the `AllowedTypes` object at the top of the `lib/intacct-ruby/function.rb` file
+
 
 ## Authentication
 
@@ -216,11 +258,15 @@ REQUEST_OPTS = {
 
 request = IntacctRuby::Request.new(REQUEST_OPTS)
 
-request.getAPISession object: nil, parameters {
+request.getAPISession object: nil, parameters: {
   locationid: "1"
 }
 
-session_id = request.send
+or 
+
+request.getAPISession(parameters: { })
+
+session_id = request.send!
                     .response_body
                     .xpath(//sessionid)
                     .text
@@ -286,6 +332,52 @@ And then execute:
 Or install it yourself as:
 
     $ gem install intacct_ruby
+
+
+## Wrapper Class
+
+For convenience, we have added a wrapper class which can be used to easily and quickly extract objects. This and its sample usage are provided in the `examples` folder here, but not explicitly installed as part of this gem. 
+the IntacctRuby class can be found in the `intacct_integration.rb` file and sample usage can be found in `intacct_test.rb` and also here.
+
+Query status and errors are found in the .errors and .status methods after a query. These methods also already parse the XML for 
+specific objects and map them to an object.
+
+### Test Bad Credentials
+```
+valid = IntacctIntegration::checkCreds(config[:companyid], config[:userid].to_s + "bad user", "bad pass", true)
+```
+
+### Check Valid Credentials
+```
+valid = IntacctIntegration::checkCreds('company-id', 'user-id', 'user-password', true)
+```
+
+or 
+
+```
+valid = IntacctIntegration::checkCreds(config[:companyid], config[:userid], config[:user_password], true)
+```
+
+
+### check new object from config params
+```
+intacct = IntacctIntegration.new(config[:companyid], config[:userid], config[:user_password], true)
+puts "session id => " + intacct.session
+```
+
+### Get Entities, Departments Ledgers and Accounts
+```
+entities = intacct.getEntities
+deps     = intacct.getDepartments
+gls      = intacct.getLedgers 
+accounts = intacct.getAccounts 
+```
+
+### get trial balance
+```
+bals = intacct.getTrialBalances 
+```
+
 
 ## Contributing
 
