@@ -16,6 +16,8 @@ module IntacctRuby
       getAPISession
       create_potransaction
       get_trialbalance
+      get_accountbalances
+      get_accountbalancesbydimensions
       getDimension
     ).freeze
 
