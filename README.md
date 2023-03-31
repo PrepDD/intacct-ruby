@@ -163,38 +163,64 @@ If there are function errors (e.g. you omitted a required field) you'll see an e
 
 ### Read Requests of Web API
 
-Note if you're using the Web API, for example `get_TrialBalance`, you can call that function directly rather than use the `readByQuery` method.
+Note if you're using the Web API, for example `get_TrialBalance` or `get_AccountBalance`, you can call that function directly rather than use the `readByQuery` method.
 
-For instance:
+getTrialBalances vs getAccountBalances
+There are two methods available to get balances: getTrialBalances and getAccountBalances.
+
+To retrieve balances using getTrialBalances, you can call it directly, like this:
 
 ```
-    @request.get_trialbalance parameters: { 
-      startdate: {:year => '1900', :month => '01', :day => '01'},
-      enddate: {:year => Time.now.year, :month => Time.now.month, :day => Time.now.day},
-      departmentid: department_id,
-      locationid: location_id
-    } 
+   @request.get_trialbalance parameters: { 
+   startdate: {:year => '1900', :month => '01', :day => '01'},
+   enddate: {:year => Time.now.year, :month => Time.now.month, :day => Time.now.day},
+   departmentid: department_id,
+   locationid: location_id
+   } 
 
+   response = @r.send!
 
-    #puts @r.to_xml 
+   body = response.response_body
 
-    response = @r.send!
+   bals = body.xpath("//trialbalance")
 
-    body = response.response_body
+   all_bals = Array.new 
 
-    #puts body.to_xhtml 
-    bals = body.xpath("//trialbalance")
+   bals.each do |bal|
+   bal_obj = {}
+   bal_obj["id"] = bal.xpath("glaccountno").text
+   bal_obj["balance"] = bal.xpath("endbalance").text
+   bal_obj["reportingbook"] = bal.xpath("reportingbook").text
+   bal_obj["currency"] = bal.xpath("currency").text
+   all_bals.push (bal_obj)
+   end 
+```
+To retrieve balances using getAccountBalances, call it like this:
 
-    all_bals = Array.new 
-   
-    bals.each do |bal|
-      bal_obj = {} 
-      bal_obj["id"] = bal.xpath("glaccountno").text
-      bal_obj["balance"] = bal.xpath("endbalance").text
-      bal_obj["reportingbook"] = bal.xpath("reportingbook").text
-      bal_obj["currency"] = bal.xpath("currency").text
-      all_bals.push (bal_obj)
-    end 
+```
+   @request.get_accountbalancesbydimensions parameters: { 
+   startdate: {:year => '1900', :month => '01', :day => '01'},
+   enddate: {:year => Time.now.year, :month => Time.now.month, :day => Time.now.day},
+   departmentid: department_id,
+   locationid: location_id
+   } 
+
+   response = @r.send!
+
+   body = response.response_body
+
+   bals = body.xpath("//accountbalance")
+
+   all_bals = Array.new 
+
+   bals.each do |bal|
+   bal_obj = {}
+   bal_obj["id"] = bal.xpath("glaccountno").text
+   bal_obj["balance"] = bal.xpath("endbalance").text
+   bal_obj["reportingbook"] = bal.xpath("reportingbook").text
+   bal_obj["currency"] = bal.xpath("currency").text
+   all_bals.push (bal_obj)
+   end 
 ```
 
 If you could a `function not allowed` error, you may need to change the `AllowedTypes` object at the top of the `lib/intacct-ruby/function.rb` file
