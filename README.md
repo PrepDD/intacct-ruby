@@ -170,57 +170,57 @@ There are two methods available to get balances: getTrialBalances and getAccount
 
 To retrieve balances using getTrialBalances, you can call it directly, like this:
 
-```
-   @request.get_trialbalance parameters: { 
+```ruby
+ @request.get_trialbalance parameters: { 
    startdate: {:year => '1900', :month => '01', :day => '01'},
    enddate: {:year => Time.now.year, :month => Time.now.month, :day => Time.now.day},
    departmentid: department_id,
    locationid: location_id
-   } 
+ } 
 
-   response = @r.send!
+ response = @r.send!
 
-   body = response.response_body
+ body = response.response_body
 
-   bals = body.xpath("//trialbalance")
+ bals = body.xpath("//trialbalance")
 
-   all_bals = Array.new 
+ all_bals = Array.new 
 
-   bals.each do |bal|
+ bals.each do |bal|
    bal_obj = {}
    bal_obj["id"] = bal.xpath("glaccountno").text
    bal_obj["balance"] = bal.xpath("endbalance").text
    bal_obj["reportingbook"] = bal.xpath("reportingbook").text
    bal_obj["currency"] = bal.xpath("currency").text
    all_bals.push (bal_obj)
-   end 
+ end 
 ```
 To retrieve balances using getAccountBalances, call it like this:
 
-```
-   @request.get_accountbalancesbydimensions parameters: { 
+```ruby
+ @request.get_accountbalancesbydimensions parameters: { 
    startdate: {:year => '1900', :month => '01', :day => '01'},
    enddate: {:year => Time.now.year, :month => Time.now.month, :day => Time.now.day},
    departmentid: department_id,
    locationid: location_id
-   } 
+ } 
 
-   response = @r.send!
+ response = @r.send!
 
-   body = response.response_body
+ body = response.response_body
 
-   bals = body.xpath("//accountbalance")
+ bals = body.xpath("//accountbalance")
 
-   all_bals = Array.new 
+ all_bals = Array.new 
 
-   bals.each do |bal|
+ bals.each do |bal|
    bal_obj = {}
    bal_obj["id"] = bal.xpath("glaccountno").text
    bal_obj["balance"] = bal.xpath("endbalance").text
    bal_obj["reportingbook"] = bal.xpath("reportingbook").text
    bal_obj["currency"] = bal.xpath("currency").text
    all_bals.push (bal_obj)
-   end 
+ end 
 ```
 
 If you could a `function not allowed` error, you may need to change the `AllowedTypes` object at the top of the `lib/intacct-ruby/function.rb` file
