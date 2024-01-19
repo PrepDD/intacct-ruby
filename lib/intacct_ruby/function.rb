@@ -19,6 +19,7 @@ module IntacctRuby
       get_accountbalances
       get_accountbalancesbydimensions
       getDimension
+      query
     ).freeze
 
     CU_TYPES = %w(create update).freeze
